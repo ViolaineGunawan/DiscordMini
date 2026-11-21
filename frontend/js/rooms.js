@@ -58,3 +58,23 @@ function validateUsername(v) {
   if (!NAME_RE.test(v)) return "Hanya huruf, angka, titik, garis bawah, dan strip yang boleh dipakai.";
   return "";
 }
+
+// Anggota contoh (dummy) untuk simulasi panggilan
+const SAMPLE_USERS = ["mira_", "dimas.k", "luna-s", "rafi_ap", "bima_w", "citra.n"];
+
+// Avatar inisial (dipakai halaman call)
+const AVATAR_PAIRS = [
+  ["#cfe6ff", "#e3d4ff"], ["#ffd3e6", "#ffe6c9"], ["#c9f3e4", "#cfe6ff"],
+  ["#e3d4ff", "#ffd3e6"], ["#ffe6c9", "#c9f3e4"], ["#d8c8ff", "#cfe6ff"],
+];
+function avatarPair(n) {
+  let h = 0;
+  for (const c of n) h = (h * 31 + c.codePointAt(0)) >>> 0;
+  return AVATAR_PAIRS[h % AVATAR_PAIRS.length];
+}
+function initialsOf(n) {
+  const parts = n.split(/[._-]+/).filter(Boolean);
+  const first = (s) => [...s][0] || "";
+  const out = parts.length >= 2 ? first(parts[0]) + first(parts[1]) : [...n].slice(0, 2).join("");
+  return out.toUpperCase();
+}

@@ -291,6 +291,96 @@
     }
   });
 
+  /* ---------- Panggilan suara (Start / Join call) ---------- */
+  const callBtn = $("#callBtn");
+  const callTime = $("#callTime");
+  const callDot = $("#callDot");
+  const callModal = $("#callModal");
+  const callDialog = callModal.querySelector(".dialog");
+  let callState = null;
+  let callLastFocus = null;
+
+  function callCountText(s) {
+    const n = s ? Object.keys(s.members).length : 0;
+    return " · " + n + " orang di panggilan";
+  }
+
+  function refreshCall() {
+    callState = CallStore.get(room.id);
+    const live = !!callState;
+    callBtn.classList.toggle("live", live);
+    callTime.hidden = !live;
+    callDot.hidden = !live;
+    if (live) {
+      const t = formatDuration(Date.now() - callState.startedAt);
+      callTime.textContent = t;
+      callBtn.setAttribute("aria-label", "Gabung panggilan, sudah berlangsung " + t);
+      callBtn.title = "Gabung panggilan";
+    } else {
+      callBtn.setAttribute("aria-label", "Mulai panggilan suara");
+      callBtn.title = "Panggilan suara";
+    }
+    if (callModal.classList.contains("open")) fillCallDialog();
+  }
+
+  function fillCallDialog() {
+    const live = !!callState;
+    $("#cTitle").textContent = live ? "Join call?" : "Start call?";
+    $("#cDesc").textContent = live
+      ? "Panggilan di " + room.name + " sedang berlangsung. Gabung sekarang sebagai @" + name + "?"
+      : "Panggilan suara akan dimulai di " + room.name + " dan anggota room akan dipanggil. Pastikan mikrofon kamu siap.";
+    $("#cLive").hidden = !live;
+    if (live) {
+      $("#cTime").textContent = formatDuration(Date.now() - callState.startedAt);
+      $("#cCount").textContent = callCountText(callState);
+    }
+  }
+
+  function setBgInert(on) { $(".app").inert = on; }
+
+  function openCall() {
+    refreshCall();
+    callLastFocus = callBtn;
+    fillCallDialog();
+    callModal.inert = false;
+    callModal.setAttribute("aria-hidden", "false");
+    callModal.classList.add("open");
+    document.documentElement.classList.add("modal-open");
+    setBgInert(true);
+    requestAnimationFrame(() => $("#cYes").focus());
+  }
+
+  function closeCall() {
+    if (!callModal.classList.contains("open")) return;
+    callModal.classList.remove("open");
+    callModal.setAttribute("aria-hidden", "true");
+    callModal.inert = true;
+    document.documentElement.classList.remove("modal-open");
+    setBgInert(false);
+    callBtn.focus();
+  }
+
+  callBtn.addEventListener("click", openCall);
+  callModal.addEventListener("click", (e) => { if (e.target === callModal || e.target.closest("[data-close]")) closeCall(); });
+  $("#cYes").addEventListener("click", () => {
+    $("#cYes").disabled = true;
+    location.href = "call.html?id=" + encodeURIComponent(room.id) + "&u=" + encodeURIComponent(name);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (!callModal.classList.contains("open")) return;
+    if (e.key === "Escape") { closeCall(); return; }
+    if (e.key !== "Tab") return;
+    const items = [...callDialog.querySelectorAll("button")].filter((n) => !n.disabled);
+    const first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+
+  refreshCall();
+  setInterval(refreshCall, 1000);
+  window.addEventListener("storage", (e) => { if (e.key === CallStore.key(room.id)) refreshCall(); });
+  window.addEventListener("pageshow", (e) => { if (e.persisted) { $("#cYes").disabled = false; closeCall(); refreshCall(); } });
+
   window.addEventListener("pagehide", () => post({ t: "bye", cid: CID, name }));
   window.addEventListener("resize", () => { if (pinned) toBottom(); });
   msg.focus({ preventScroll: true });

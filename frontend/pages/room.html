@@ -29,7 +29,7 @@
 
     <!-- Navigation bar (gelap) -->
     <header class="nav">
-      <a class="brand" href="../index.html" aria-label="Discord Mini, kembali ke daftar room">
+      <a class="brand" href="index.html" aria-label="Discord Mini, kembali ke daftar room">
         <span class="logo">
           <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
             <defs>
@@ -66,10 +66,15 @@
       </div>
       <div class="r-side">
         <span class="me-chip" title="Username kamu"><span class="me-dot" aria-hidden="true"></span><span id="meName"></span></span>
-        <a class="btn-leave" href="../index.html">
+        <a class="btn-leave" href="index.html">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="M16 8l4 4-4 4M20 12H9"/></svg>
           <span>Keluar</span>
         </a>
+        <button type="button" class="btn-call" id="callBtn" aria-haspopup="dialog" aria-label="Mulai panggilan suara" title="Panggilan suara">
+          <i class="pulse" id="callDot" aria-hidden="true" hidden></i>
+          <span class="call-time" id="callTime" hidden>00:00</span>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.920v3a2 2 0 0 1-2.180 2 19.790 19.790 0 0 1-8.630-3.070 19.500 19.500 0 0 1-6-6 19.790 19.790 0 0 1-3.070-8.670A2 2 0 0 1 4.110 2h3a2 2 0 0 1 2 1.720 12.840 12.840 0 0 0 .7 2.810 2 2 0 0 1-.45 2.110L8.090 9.910a16 16 0 0 0 6 6l1.270-1.270a2 2 0 0 1 2.110-.45 12.840 12.840 0 0 0 2.810.7A2 2 0 0 1 22 16.920z"/></svg>
+        </button>
       </div>
     </section>
 
@@ -106,9 +111,29 @@
     </form>
   </div>
 
+  <!-- Popup Start / Join call -->
+  <div id="callModal" class="modal" aria-hidden="true" inert>
+    <div class="modal-bg" data-close></div>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="cTitle" aria-describedby="cDesc">
+      <span class="orb dialog-orb dialog-orb-a" aria-hidden="true"></span>
+      <span class="orb dialog-orb dialog-orb-b" aria-hidden="true"></span>
+      <span class="call-orb" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#1b2342" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.920v3a2 2 0 0 1-2.180 2 19.790 19.790 0 0 1-8.630-3.070 19.500 19.500 0 0 1-6-6 19.790 19.790 0 0 1-3.070-8.670A2 2 0 0 1 4.110 2h3a2 2 0 0 1 2 1.720 12.840 12.840 0 0 0 .7 2.810 2 2 0 0 1-.45 2.110L8.090 9.910a16 16 0 0 0 6 6l1.270-1.270a2 2 0 0 1 2.110-.45 12.840 12.840 0 0 0 2.810.7A2 2 0 0 1 22 16.920z"/></svg>
+      </span>
+      <h2 id="cTitle">Start call?</h2>
+      <p class="dlg-lead" id="cDesc"></p>
+      <p class="live-info" id="cLive" hidden><i class="pulse" aria-hidden="true"></i><b id="cTime">00:00</b><span id="cCount"></span></p>
+      <div class="dlg-actions">
+        <button type="button" class="btn-ghost" data-close id="cNo">Tidak</button>
+        <button type="button" class="btn-primary" id="cYes">Ya</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="../js/rooms.js"></script>
+  <script src="../js/callstore.js"></script>
   <script src="../js/room.js"></script>
 </body>
 </html>

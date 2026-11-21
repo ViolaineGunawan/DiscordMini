@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Call — Discord Mini</title>
+  <meta name="theme-color" content="#eef3ff">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/room.css">
+  <link rel="stylesheet" href="../css/call.css">
+</head>
+<body class="call-page">
+  <!-- Gradient mesh atmosphere -->
+  <div class="mesh" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+    <span class="blob b4"></span>
+    <span class="blob b5"></span>
+    <span class="grain"></span>
+  </div>
+  <div class="deco" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+  </div>
+
+  <div class="app">
+
+    <!-- Navigation bar -->
+    <header class="nav">
+      <a class="brand" href="index.html" aria-label="Discord Mini, kembali ke daftar room">
+        <span class="logo">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <defs>
+              <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#8fc8ff"/>
+                <stop offset=".5" stop-color="#c3a9ff"/>
+                <stop offset="1" stop-color="#ffb3d4"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#lg)" d="M5 3.5h14A3.5 3.5 0 0 1 22.500 7v8a3.5 3.5 0 0 1-3.500 3.500h-5.800l-3.900 3c-.6.5-1.500.1-1.500-.7V18.500H5A3.500 3.500 0 0 1 1.500 15V7A3.500 3.500 0 0 1 5 3.500z"/>
+            <circle cx="8" cy="11" r="1.300" fill="#1b2342" opacity=".75"/>
+            <circle cx="12" cy="11" r="1.300" fill="#1b2342" opacity=".75"/>
+            <circle cx="16" cy="11" r="1.300" fill="#1b2342" opacity=".75"/>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <span class="brand-name">Discord Mini</span>
+          <span class="online"><i class="pulse" aria-hidden="true"></i><b id="totalOnline">0</b>&nbsp;online now</span>
+        </span>
+      </a>
+      <!-- Ganti href sesuai halaman login admin -->
+      <a class="btn-signin" href="admin/login.html">
+        Sign In
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </header>
+
+    <!-- Room header -->
+    <section class="room-bar" aria-label="Info room">
+      <div class="thumb" id="rThumb" aria-hidden="true"></div>
+      <div class="r-text">
+        <h1 id="rName">Memuat…</h1>
+        <p class="r-meta"><i class="pulse" aria-hidden="true"></i><b id="rMembers">0</b>&nbsp;anggota di dalam room</p>
+      </div>
+      <div class="r-side">
+        <span class="me-chip" title="Username kamu"><span class="me-dot" aria-hidden="true"></span><span id="meName"></span></span>
+        <span class="timer-chip" role="timer" aria-label="Durasi panggilan"><i class="pulse" aria-hidden="true"></i><b id="timerText">00:00</b></span>
+      </div>
+    </section>
+
+    <!-- Tiga panel -->
+    <main class="grid">
+
+      <!-- Panel kiri: panggilan saya -->
+      <section class="panel stage" aria-label="Panggilan kamu">
+        <div class="stage-top">
+          <div class="tag-row">
+            <span class="tag-label"><i class="pulse" aria-hidden="true"></i>In Call</span>
+            <span class="count-pill" id="inCount" aria-label="Jumlah pengguna dalam panggilan">1</span>
+          </div>
+          <p class="calling-line">Calling <b id="callingCount">0</b> <span>sedang dipanggil</span></p>
+        </div>
+
+        <div class="me-area">
+          <div class="big-av" id="bigAv" aria-hidden="true"></div>
+          <h2 id="bigName"></h2>
+          <p class="me-status" id="meStatus">Menyiapkan mikrofon…</p>
+          <div class="wave-box" aria-hidden="true"><div class="wave" id="wave"></div></div>
+        </div>
+
+        <div class="controls">
+          <button type="button" class="ctl" id="muteBtn">
+            <svg class="i-on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>
+            <svg class="i-off" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/><path d="M4 4l16 16"/></svg>
+            <span id="muteLabel">Mute</span>
+          </button>
+          <button type="button" class="ctl end" id="endBtn" aria-label="Akhiri panggilan">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: rotate(135deg)"><path d="M22 16.920v3a2 2 0 0 1-2.180 2 19.790 19.790 0 0 1-8.630-3.070 19.500 19.500 0 0 1-6-6 19.790 19.790 0 0 1-3.070-8.670A2 2 0 0 1 4.110 2h3a2 2 0 0 1 2 1.720 12.840 12.840 0 0 0 .7 2.810 2 2 0 0 1-.45 2.110L8.090 9.910a16 16 0 0 0 6 6l1.270-1.270a2 2 0 0 1 2.110-.45 12.840 12.840 0 0 0 2.810.7A2 2 0 0 1 22 16.920z"/></svg>
+            <span>End Call</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Panel kanan atas: In Call -->
+      <section class="panel side" aria-labelledby="inTitle">
+        <header class="p-head">
+          <h2 class="p-title" id="inTitle"><i class="dot ok" aria-hidden="true"></i>In Call</h2>
+          <span class="count-pill soft" id="inCount2">1</span>
+        </header>
+        <ul class="ulist" id="inList"></ul>
+      </section>
+
+      <!-- Panel kanan bawah: Calling -->
+      <section class="panel side" aria-labelledby="callTitle">
+        <header class="p-head">
+          <h2 class="p-title" id="callTitle"><i class="dot warn" aria-hidden="true"></i>Calling</h2>
+          <span class="count-pill soft" id="callingCount2">0</span>
+        </header>
+        <ul class="ulist" id="callList"></ul>
+      </section>
+    </main>
+  </div>
+
+  <!-- Menu tiga titik -->
+  <div class="menu" id="menu" role="menu" aria-label="Aksi panggilan" hidden>
+    <button type="button" role="menuitem" class="danger" data-act="cancelCall">Cancel Call</button>
+    <button type="button" role="menuitem" class="danger" data-act="cancelInvite">Cancel Invitation</button>
+    <button type="button" role="menuitem" data-act="invite">Invite to Call</button>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="../js/rooms.js"></script>
+  <script src="../js/callstore.js"></script>
+  <script src="../js/call.js"></script>
+</body>
+</html>
