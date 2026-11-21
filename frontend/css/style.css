@@ -589,3 +589,7 @@ html.modal-open { overflow: hidden; }
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- Foto room (menggantikan emoji) ---------- */
+.thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb .initial { position: relative; z-index: 1; font-weight: 800; font-size: 0.85em; color: var(--ink-2); }

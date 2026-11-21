@@ -1,34 +1,17 @@
 /* ==========================================================
    Discord Mini — Home Client + Join Room Popup
-   Data room & jumlah "online" masih contoh (dummy) / simulasi.
+   Data room ada di rooms.js. Jumlah "online" masih simulasi.
    Sambungkan ke backend / WebSocket kamu nanti.
    ========================================================== */
 
-// Setelah username dikirim, user diarahkan ke ROOM_URL + id room.
-// Contoh: "room.html?id="  → room.html?id=gaming-night
-// Biarkan null jika halaman room belum ada (akan muncul layar "Siap masuk!").
-const ROOM_URL = null;
+// Setelah username dikirim, user langsung diarahkan ke halaman room chat.
+const ROOM_URL = "pages/room.html?id=";
 
 // Username & room disimpan agar bisa dibaca halaman room chat:
 //   localStorage["discordmini:username"]   → username terakhir (untuk prefill)
 //   sessionStorage["discordmini:session"]  → { room: "<id>", username: "<nama>" }
 const KEY_NAME = "discordmini:username";
 const KEY_SESSION = "discordmini:session";
-
-const ROOMS = [
-  { id: "general-lounge", name: "General Lounge",    emoji: "☁️", g: ["#cfe6ff", "#e3d4ff"], n: 142 },
-  { id: "gaming-night",   name: "Gaming Night",      emoji: "🎮", g: ["#d8c8ff", "#ffd3e6"], n: 98 },
-  { id: "music-corner",   name: "Music Corner",      emoji: "🎧", g: ["#ffd3e6", "#ffe6c9"], n: 76 },
-  { id: "study-hall",     name: "Study Hall",        emoji: "📚", g: ["#c9f3e4", "#cfe6ff"], n: 64 },
-  { id: "dev-talk",       name: "Dev Talk",          emoji: "💻", g: ["#cfe6ff", "#c9f3e4"], n: 57 },
-  { id: "anime-club",     name: "Anime Club",        emoji: "🌸", g: ["#ffd3e6", "#d8c8ff"], n: 88 },
-  { id: "art-design",     name: "Art & Design",      emoji: "🎨", g: ["#e3d4ff", "#c9f3e4"], n: 41 },
-  { id: "movie-club",     name: "Movie Club",        emoji: "🎬", g: ["#ffe6c9", "#ffd3e6"], n: 52 },
-  { id: "fitness-crew",   name: "Fitness Crew",      emoji: "🏃", g: ["#c9f3e4", "#fff1c9"], n: 33 },
-  { id: "language-swap",  name: "Language Exchange", emoji: "🌏", g: ["#cfe6ff", "#d8c8ff"], n: 47 },
-  { id: "photo-walk",     name: "Photo Walk",        emoji: "📷", g: ["#e3d4ff", "#cfe6ff"], n: 29 },
-  { id: "late-night",     name: "Late Night Talks",  emoji: "🌙", g: ["#d8c8ff", "#cfe6ff"], n: 71 },
-];
 
 /* ---------- Elements ---------- */
 const $ = (s) => document.querySelector(s);
@@ -44,8 +27,6 @@ const emptyQ = $("#emptyQ");
 // popup
 const modal = $("#joinModal");
 const dialog = modal.querySelector(".dialog");
-const stepForm = $("#stepForm");
-const joinOk = $("#joinOk");
 const form = $("#joinForm");
 const uField = $("#uField");
 const uInput = $("#username");
@@ -55,7 +36,7 @@ const submitBtn = $("#submitBtn");
 const submitLabel = $("#submitLabel");
 
 let refs = new Map(); // id -> { count }
-const fmt = (n) => n.toLocaleString("en-US");
+const fmt = formatNumber;
 
 /* ---------- Helpers ---------- */
 function el(tag, cls, text) {
@@ -95,10 +76,8 @@ function buildRoom(r, i, q, animate) {
   li.style.setProperty("--i", i);
 
   const thumb = el("div", "thumb");
-  thumb.style.setProperty("--g1", r.g[0]);
-  thumb.style.setProperty("--g2", r.g[1]);
   thumb.setAttribute("aria-hidden", "true");
-  thumb.append(el("span", null, r.emoji));
+  fillThumb(thumb, r);
 
   const info = el("div", "info");
   const h3 = el("h3");
@@ -162,19 +141,9 @@ function drift() {
 /* ==========================================================
    Join popup
    ========================================================== */
-const NAME_RE = /^[\p{L}\p{N}._-]+$/u;
 let activeRoom = null;
 let lastFocus = null;
 let sending = false;
-
-function validate(v) {
-  if (!v) return "Username tidak boleh kosong.";
-  if (/\s/.test(v)) return "Username tidak boleh mengandung spasi.";
-  if (v.length < 3) return "Username minimal 3 karakter.";
-  if (v.length > 20) return "Username maksimal 20 karakter.";
-  if (!NAME_RE.test(v)) return "Hanya huruf, angka, titik, garis bawah, dan strip yang boleh dipakai.";
-  return "";
-}
 
 function setError(msg) {
   uErr.textContent = msg;
@@ -197,17 +166,12 @@ function openJoin(room, trigger) {
   activeRoom = room;
   lastFocus = trigger;
 
-  // isi info room
-  const thumb = $("#dThumb");
-  thumb.style.setProperty("--g1", room.g[0]);
-  thumb.style.setProperty("--g2", room.g[1]);
-  $("#dEmoji").textContent = room.emoji;
+  // isi info room (foto, nama, online)
+  fillThumb($("#dThumb"), room);
   $("#dRoom").textContent = room.name;
   $("#dOnline").textContent = fmt(room.n);
 
   // reset tampilan
-  stepForm.hidden = false;
-  joinOk.hidden = true;
   resetSubmit();
   setError("");
   uInput.value = read("local", KEY_NAME) || "";
@@ -233,25 +197,12 @@ function closeJoin() {
   if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
 }
 
-function showSuccess(name) {
-  $("#okText").replaceChildren(
-    document.createTextNode("Kamu bergabung ke "),
-    el("b", null, activeRoom.name),
-    document.createTextNode(" sebagai "),
-    el("b", null, "@" + name),
-    document.createTextNode(".")
-  );
-  stepForm.hidden = true;
-  joinOk.hidden = false;
-  $("#okTitle").focus();
-}
-
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   if (sending || !activeRoom) return;
 
   const name = uInput.value.trim();
-  const err = validate(name);
+  const err = validateUsername(name);
   if (err) {
     setError(err);
     dialog.classList.remove("shake");
@@ -265,21 +216,16 @@ form.addEventListener("submit", (e) => {
   sending = true;
   submitBtn.disabled = true;
   submitBtn.classList.add("is-loading");
-  submitLabel.textContent = "Mengirim";
+  submitLabel.textContent = "Masuk";
 
   const room = activeRoom;
   // TODO: kirim { room: room.id, username: name } ke server dan tunggu respons di sini.
   setTimeout(() => {
     store("local", KEY_NAME, name);
     store("session", KEY_SESSION, JSON.stringify({ room: room.id, username: name }));
-
-    if (ROOM_URL) {
-      location.href = ROOM_URL + encodeURIComponent(room.id);
-    } else {
-      resetSubmit();
-      showSuccess(name);
-    }
-  }, 700);
+    // "u" dipakai sebagai cadangan jika storage browser diblokir
+    location.href = ROOM_URL + encodeURIComponent(room.id) + "&u=" + encodeURIComponent(name);
+  }, 600);
 });
 
 uInput.addEventListener("input", () => {
@@ -287,7 +233,7 @@ uInput.addEventListener("input", () => {
   if (uErr.textContent) setError("");
 });
 
-// tutup: tombol X, tombol Selesai, klik area gelap, Esc
+// tutup: tombol X, klik area gelap, Esc
 modal.addEventListener("click", (e) => {
   if (e.target === modal || e.target.closest("[data-close]")) closeJoin();
 });
@@ -307,6 +253,11 @@ document.addEventListener("keydown", (e) => {
   } else if (!e.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
     e.preventDefault(); first.focus();
   }
+});
+
+// Kembali dari room lewat tombol Back: pastikan popup tidak menggantung
+window.addEventListener("pageshow", (e) => {
+  if (e.persisted) { resetSubmit(); closeJoin(); }
 });
 
 /* ---------- Search events ---------- */

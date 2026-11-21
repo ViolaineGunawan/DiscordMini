@@ -119,7 +119,7 @@
 
       <!-- Room yang dipilih -->
       <div class="room-chip">
-        <div class="thumb sm" id="dThumb" aria-hidden="true"><span id="dEmoji"></span></div>
+        <div class="thumb sm" id="dThumb" aria-hidden="true"></div>
         <div class="chip-text">
           <p class="chip-label">Bergabung ke room</p>
           <p class="chip-name" id="dRoom"></p>
@@ -151,19 +151,10 @@
           </button>
         </form>
       </div>
-
-      <!-- Langkah 2: berhasil -->
-      <div id="joinOk" class="success" hidden>
-        <span class="ok-orb" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#1b2342" stroke-width="2.600" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg>
-        </span>
-        <h2 tabindex="-1" id="okTitle">Siap masuk!</h2>
-        <p class="dlg-lead" id="okText"></p>
-        <button type="button" class="btn-ghost" data-close>Selesai</button>
-      </div>
     </div>
   </div>
 
+  <script src="js/rooms.js"></script>
   <script src="js/script.js"></script>
 </body>
 </html>
